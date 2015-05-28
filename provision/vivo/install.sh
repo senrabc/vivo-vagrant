@@ -23,6 +23,19 @@ sudo rm -rf $APPDIR
 #create vivo database
 mysql -uroot -pvivo -e "CREATE DATABASE IF NOT EXISTS vivodev DEFAULT CHARACTER SET utf8;"
 
+#turn slow query profiling on: ( these will go away after a mysql restart)
+mysql -uroot -pvivo -e "SET GLOBAL slow_query_log = 'ON';"
+mysql -uroot -pvivo -e "SET GLOBAL slow_query_log_file = '/var/log/mysql/localhost-slow.log';"
+mysql -uroot -pvivo -e "SET GLOBAL log_queries_not_using_indexes = 'ON';"
+mysql -uroot -pvivo -e "SET SESSION long_query_time = 1;"
+mysql -uroot -pvivo -e "SET SESSION min_examined_row_limit = 100;"
+
+#if you want to mannually check to see if these are on use the follwoing query in the vivodev db
+#mysql> SHOW GLOBAL VARIABLES LIKE 'slow_query_log';
+#mysql> SHOW SESSION VARIABLES LIKE 'long_query_time';
+
+
+
 #Make app directory
 sudo mkdir -p $APPDIR
 #Make data directory
