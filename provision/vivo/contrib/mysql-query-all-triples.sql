@@ -10,7 +10,7 @@
 SELECT                                   -- V_1=?s V_2=?p V_3=?o
   CONCAT("<", R_1.lex, ">") AS V_1_lex,  
   CONCAT("<", R_2.lex, ">") AS V_2_lex, 
-  CONCAT('"', R_3.lex, '"^^<', R_3.datatype, '> . ') AS V_3_lex
+  CONCAT("'", R_3.lex, "'^^<", R_3.datatype, '> . ') AS V_3_lex
 FROM
     ( SELECT DISTINCT                    -- <urn:x-arq:DefaultGraphNode> ?s ?p ?o
                                          -- ?p:(Q_1.p=>S_1.X_1) ?o:(Q_1.o=>S_1.X_2) ?s:(Q_1.s=>S_1.X_3)
@@ -27,4 +27,3 @@ FROM
   LEFT OUTER JOIN
     Nodes AS R_3                         -- Var: ?o
   ON ( S_1.X_2 = R_3.hash );
-
