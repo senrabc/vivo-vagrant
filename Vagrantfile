@@ -17,7 +17,7 @@ Vagrant::Config.run do |config|
   # config.vm.boot_mode = :gui
 
   #Memory 2GBs
-  config.vm.customize ["modifyvm", :id, "--memory", 2048]
+  config.vm.customize ["modifyvm", :id, "--memory", 8192]
 
   # Assign this VM to a host-only network IP, allowing you to access it
   # via the IP. Host-only networks can talk to the host machine as well as
