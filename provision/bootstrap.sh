@@ -3,68 +3,66 @@
 #
 # Setup the base box
 #
-
-export DEBIAN_FRONTEND=noninteractive
+set -o verbose
 #Exit on first error
 set -e
-#Print shell commands
-set -x
 
 #Update Ubuntu packages. Comment out during development
-sudo apt-get update -y
+apt-get update -y
 
 #Set time zone
 area="America"
 zone="New_York"
-sudo echo "$area/$zone" > /tmp/timezone
-sudo cp -f /tmp/timezone /etc/timezone
-sudo cp -f /usr/share/zoneinfo/$area/$zone /etc/localtime
+echo "$area/$zone" > /tmp/timezone
+cp -f /tmp/timezone /etc/timezone
+cp -f /usr/share/zoneinfo/$area/$zone /etc/localtime
 
 # Basics.
-sudo apt-get install -y git vim screen wget curl raptor-utils unzip
+apt-get install -y git vim screen wget curl raptor-utils unzip
 
-# Web server
-sudo apt-get install -y apache2
+# Install open jdk 8
+installJava(){
+    add-apt-repository ppa:openjdk-r/ppa -y
+    apt-get update -y
+    apt-get install openjdk-8-jdk -y
+}
 
-# Install Oracle Java 7 which best supports Java Advanced Imaging (JAI),
-# or uncomment line below and comment out other 6 lines to install OpenJDK7 instead
-#sudo apt-get install -y openjdk-7-jdk
-sudo apt-get install python-software-properties -y
-sudo add-apt-repository ppa:webupd8team/java -y
-sudo apt-get update -y
-echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
-echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-sudo apt-get install oracle-java7-installer -y
+# Maven
+installMaven () {
+	cd /usr/local
+	rm -rf /usr/bin/mvn
+	rm -rf /usr/local/apache-maven-3.3.9
+	wget http://mirrors.sonic.net/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+	tar -xvf apache-maven-3.3.9-bin.tar.gz
+	ln -s /usr/local/apache-maven-3.3.9/bin/mvn /usr/bin/mvn
+}
 
 # Install Tomcat 7 with JAVA_HOME export so Tomcat starts when install completes,
-# and then patch /etc/default/tomcat7 to specify Oracle Java 7
-export JAVA_HOME=/usr/lib/jvm/java-7-oracle
-sudo -E apt-get install -y tomcat7 ant
-sudo sed -i '/#JAVA_HOME.*$/a JAVA_HOME=/usr/lib/jvm/java-7-oracle/' /etc/default/tomcat7
+installTomcat () {
+	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+	apt-get install -y tomcat7
+	sed -i '/#JAVA_HOME.*$/a JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64' /etc/default/tomcat7
+}
 
 # MySQL
-echo mysql-server mysql-server/root_password password vivo | sudo debconf-set-selections
-echo mysql-server mysql-server/root_password_again password vivo | sudo debconf-set-selections
-sudo apt-get install -y mysql-server
-sudo apt-get install -y mysql-client
+# echo mysql-server mysql-server/root_password password vivo | debconf-set-selections
+# echo mysql-server mysql-server/root_password_again password vivo | debconf-set-selections
+# apt-get install -y mysql-server
+# apt-get install -y mysql-client
 
-#Call VIVO install
-source /home/vagrant/provision/vivo/install.sh
 
-#Append defaults to .bashrc
-#Alias for viewing VIVO log
-VLOG="alias vlog='less +F /usr/share/tomcat7/logs/vivo.all.log'"
-BASHRC=/home/vagrant/.bashrc
 
-if grep "$VLOG" $BASHRC > /dev/null
-then
-   echo "log alias exists"
-else
-   (echo;  echo $VLOG)>> $BASHRC
-   echo "log alias created"
-fi
+installJava
+installMaven
+installTomcat
 
-echo Box provisioned.
+#ca-certificates-java must be explicitly installed as it is needed for maven based installation
+/var/lib/dpkg/info/ca-certificates-java.postinst configure
+
+# Make Karma scripts executable
+chmod +x /home/vagrant/provision/karma.sh
+
+echo Box boostrapped.
 
 exit
 

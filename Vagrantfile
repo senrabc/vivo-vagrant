@@ -1,21 +1,18 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
- 
-Vagrant.configure("2") do |config|	
-  config.vm.box = "precise64"
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+
+Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |v,override|
-	v.name = "vagrant_vivo_precise64"    
-	v.gui = false	
-	v.cpus = 1
-	v.memory = 1024
+    config.vm.box = "ubuntu/trusty64"
+	  v.gui = false
+	  v.cpus = 1
+	  v.memory = 1024
   end
 
   config.vm.provider "vmware_fusion" do |v,override|
-	v.name = "vagrant_vivo_precise64"
 	v.gui = false
-	v.vmx["numvcpus"] = "1"	
+	v.vmx["numvcpus"] = "1"
 	v.vmx["memsize"] = "1024"
 	override.vm.box     = "precise64_vmware_fusion"
 	override.vm.box_url = "http://files.vagrantup.com/precise64_vmware_fusion.box"
@@ -37,17 +34,26 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 80, host: 8081
   config.vm.network "forwarded_port", guest: 8080, host: 8080
   config.vm.network "forwarded_port", guest: 8000, host: 8000
-  config.vm.network "forwarded_port", guest: 5000, host: 5000
-  config.vm.network "forwarded_port", guest: 3030, host: 3030
 
   # Share an additional folder to the guest VM. The first argument is
   # an identifier, the second is the path on the guest to mount the
   # folder, and the third is the path on the host to the actual folder.
   config.vm.synced_folder "work", "/work"
-  config.vm.synced_folder "provision", "/home/vagrant/provision"  
+  config.vm.synced_folder "provision", "/home/vagrant/provision"
 
   #config.vm.share_folder "v-data", "/work", "work"
   #config.vm.share_folder "provision", "/home/vagrant/provision", "provision"
 
-  config.vm.provision "shell", path: "provision/bootstrap.sh", privileged: true	
+  # Setup box
+  config.vm.provision "bootstrap", type: "shell" do |s|
+    s.path = "provision/bootstrap.sh"
+    s.privileged = true
+  end
+
+  # Install VIVO
+  config.vm.provision "vivo", type: "shell" do |s|
+    s.path = "provision/vivo/install.sh"
+    s.privileged = true
+  end
+
 end

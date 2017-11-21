@@ -1,9 +1,10 @@
-# VIVO Vagrant
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/lawlesst/vivo-vagrant?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# VIVO Vagrant - v1.9
 
 [Vagrant](http://www.vagrantup.com/) configuration and install scripts for running [VIVO](http://vivoweb.org) on a virtual machine, aka [Vagrant box](http://docs.vagrantup.com/v2/boxes.html), running an Ubuntu 64 Precise image.
 
-The virtual machine will boot and install VIVO 1.8 and its dependencies.  This will take several minutes for the initial install.
+The virtual machine will boot and install VIVO 1.9 and its dependencies.  This will take several minutes for the initial install.
+
+If you have questions or encounter problems, please email the VIVO technical list at [vivo-tech@googlegroups.com](https://groups.google.com/forum/#!forum/vivo-tech) or open issue here in the Github issue tracker.
 
 ## Prerequisites
  * [VirtualBox](https://www.virtualbox.org/) or [VMWare Fusion](http://www.vmware.com/products/fusion).
@@ -22,7 +23,7 @@ $ vagrant up
 
 When the Vagrant provisioning script is complete, the VIVO web application will be available in a browser on the host machine at `http://localhost:8080/vivo`.  You can log into your new VIVO with the default admin user (`vivo_root@school.edu`) and password (`rootPassword`), which are specified in the `/provision/vivo/deploy.properties` source file in this repository.
 
-The source will be installed on the virtual machine at `/usr/local/vivo/`. Mac users can log into your Vagrant box securely using this command from a Terminal session.  Windows users will want to use an SSH utility, e.g. [Putty](http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html):
+The vivo application will be at `/home/vagrant/vivo`. Mac users can log into your Vagrant box securely using this command from a Terminal session.  Windows users will want to use an SSH utility, e.g. [Putty](http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html):
 
 ~~~
 $ vagrant ssh
@@ -35,56 +36,28 @@ $ vlog
 ~~~
 
 ### Commands / system layout
- * VIVO application: `/usr/local/vivo`.  The source at `/usr/local/vivo` is based off a [3-tier VIVO build template](https://github.com/lawlesst/vivo-project-template) and under git version control.
+ * VIVO application: `/home/vagrant/vivo`.
  * VIVO data directory: `/usr/local/vdata`
+ * VIVO TDB triple store: `/usr/local/vdata/tdbContentModels`
  * Tomcat: `/var/lib/tomcat7/`
  * To start/stop Tomcat run `sudo /etc/init.d/tomcat start|stop|restart`.
  * A Vagrant [shared directory](http://docs.vagrantup.com/v2/synced-folders/) is available at `/work` from the box.
  * Use the `vagrant suspend` and `vagrant resume` commands to manage your Vagrant box when not in use or if you plan to restart or shutdown the host system, as opposed to using the VirtualBox or VMWare Fusion admin user interface.
-
-## Upgrading or updating VIVO and Vitro
- * If you have a working vivo-vagrant box and don't want to re-provision your system, you can upgrade to a new release of VIVO by checking out the new release branch and rebuilding the application. 
- * 
-  ~~~
- $ sudo /etc/init.d/tomcat7 stop
- $ cd /usr/local/vivo
- $ cd VIVO
- $ git fetch
- $ git checkout v1.x 
- $ cd ../Vitro
- $ git fetch
- $ git checkout v1.x
- $ cd ..
- $ sudo ant all
- $ sudo /etc/init.d/tomcat7 start
- ~~~
-
- * You might also want to build your VIVO against unreleased code changes.  This can be done by identifying the branch that includes the changes you want to include, `cd` into the VIVO and Vitro updates and use Git to checkout the changes.  For example:
-
- ~~~
- $ sudo /etc/init.d/tomcat7 stop
- $ cd /usr/local/vivo
- $ cd VIVO
- $ git fetch
- $ git checkout maint-rel-1.8
- $ cd ../Vitro
- $ git fetch
- $ git checkout maint-rel-1.8
- $ cd ..
- $ sudo ant all
- $ sudo /etc/init.d/tomcat7 start
- ~~~
  
 ## Re-provisioning
 
-You can also, at anytime, re-provision your Vagrant box.  By running the following from your host machine.  This will reinstall all components of the Vagrant box and reinstall VIVO.  This will destroy any changes you've made to your VIVO installation so be sure to backup any data or code changes you have made beforehand.
+You can, at anytime, re-provision your Vagrant box.  By running the following from your host machine.  This will reinstall all components of the Vagrant box and reinstall VIVO.  This will destroy any changes you've made to your VIVO installation so be sure to backup any data or code changes you have made beforehand.
 
  ~~~
  $ vagrant up --provision
  ~~~
  
+## Reseting the VIVO database
+From time to time, you might also want to rollback to a clean VIVO database. This can be done by stopping tomcat and removing the file-based TDB triple store: `rm /usr/local/vdata/tdbContentModels`. Warning - this will delete all of the data you have loaded into VIVO and any ontology changes.
+
+ 
 ##Running previous releases of VIVO and Vitro
-If you are interested in running VIVO 1.5, 1.6, or 1.7 there are separate branches for each of those released version.
+If you are interested in running VIVO 1.5, 1.6, 1.7, 1.8 there are separate branches for each of those released version.
  ~~~
  $ git clone https://github.com/lawlesst/vivo-vagrant.git vivo-vagrant
  $ cd vivo-vagrant
